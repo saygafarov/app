@@ -1,11 +1,11 @@
-package com.edu.ulab.app.dto;
+package com.edu.ulab.app.entity;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class UserDto {
+public class User {
     private Long id;
     private String fullName;
     private String title;
