@@ -4,11 +4,12 @@ import com.edu.ulab.app.dto.UserDto;
 import com.edu.ulab.app.entity.User;
 import com.edu.ulab.app.mapper.UserMapperDto;
 import com.edu.ulab.app.service.UserService;
-import com.edu.ulab.app.storage.impl.UserStorageImp;
+import com.edu.ulab.app.storage.dao.UserStorageDAO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -16,12 +17,12 @@ import java.util.Objects;
 public class UserServiceImpl implements UserService {
     
     private final UserMapperDto userMapperDto;
-    private final UserStorageImp userStorage;
+    private final UserStorageDAO storageDAO;
 
     @Autowired
-    public UserServiceImpl(UserMapperDto userMapperDto, UserStorageImp userStorage) {
+    public UserServiceImpl(UserMapperDto userMapperDto, UserStorageDAO storageDAO) {
         this.userMapperDto = userMapperDto;
-        this.userStorage = userStorage;
+        this.storageDAO = storageDAO;
     }
 
     @Override
@@ -29,11 +30,9 @@ public class UserServiceImpl implements UserService {
         log.debug("Got userDto create userMapper: {}", userDto);
         User userMapper = userMapperDto.userDtoYoUser(Objects.requireNonNull(userDto,"Not found userDto"));
         log.debug("Mapped userDto: {}", userMapper);
-        User user = userStorage.create(userMapper);
+        User user = storageDAO.createUser(userMapper);
         log.debug("Created user: {}", user);
-        // сгенерировать идентификатор
-        // создать пользователя
-        // вернуть сохраненного пользователя со всеми необходимыми полями id
+
         return userMapperDto.userToUserDto(user);
     }
 
@@ -42,7 +41,7 @@ public class UserServiceImpl implements UserService {
         log.debug("Got userDto update userMapper: {}", userDto);
         User userMapper = userMapperDto.userDtoYoUser(Objects.requireNonNull(userDto, "Not found userDto"));
         log.debug("Mapped userDto: {}", userMapper);
-        User userUpdated = userStorage.update(userMapper);
+        User userUpdated = storageDAO.updateUser(userMapper);
         log.debug("Update userUpdated: {}", userUpdated);
 
         return userMapperDto.userToUserDto(userUpdated);
@@ -51,7 +50,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUserById(Long id) {
         log.debug("Got id get user by id: {}", id);
-        User user = userStorage.get(id);
+        User user = storageDAO.getUserById(id);
         log.debug("Get user by id: {}", user);
 
         return userMapperDto.userToUserDto(Objects.requireNonNull(user, "Not found user"));
@@ -60,6 +59,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUserById(Long id) {
         log.debug("Got id delete user by id: {}", id);
-        userStorage.delete(id);
+        storageDAO.deleteUserById(id);
+    }
+
+    @Override
+    public List<Long> getBooksByUserId(Long id) {
+        User user = storageDAO.getUserById(id);
+
+        return Objects.requireNonNull(user.getBooks());
     }
 }
